@@ -4,9 +4,151 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LightingApplier2D"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="LightingApplier" Height="450" Width="800">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0"
+                    Background="Azure">
+            <Grid x:Name="Mesh">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Show Mesh"/>
+                <CheckBox IsChecked="{Binding ShowMesh}"
+                          Grid.Column="1"/>
+            </Grid>
+            <Grid x:Name="Size">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="N: "/>
+                <TextBox Text="{Binding N}"
+                          Grid.Column="1"
+                         Width="40"/>
+                <TextBlock Text="M: " Grid.Column="2"/>
+                <TextBox Text="{Binding M}"
+                          Grid.Column="3"
+                         Width="40"/>
+            </Grid>
+            <TextBlock Text="Normal vectors"/>
+            <RadioButton Content="Constant"
+                         GroupName="NormalVectors"
+                         IsChecked="{Binding UsePredefinedNormal}"/>
+            <RadioButton GroupName="NormalVectors">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Map"/>
+                    <Button Grid.Column="1" Click="Button_Click" Width="60" Margin="5,0,0,0" Content="Upload"/>
+                </Grid>
+            </RadioButton>
+            <TextBlock Text="Color"/>
+            <RadioButton IsChecked="{Binding UseSelectedColor}"
+                         GroupName="Color">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Selected"/>
+                    <xctk:ColorPicker Grid.Column="1" SelectedColor="{Binding IO}" Width="60" Margin="5,0,0,0"/>
+                </Grid>
+            </RadioButton>
+            <RadioButton GroupName="Color">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Texture  "/>
+                    <Button Grid.Column="1" Click="Button_Click_1" Width="60" Margin="5,0,0,0" Content="Upload"/>
+                </Grid>
+            </RadioButton>
+            <TextBlock Text="Parameters:"/>
+            <RadioButton Content="Random" GroupName="Parameters"/>
+            <RadioButton Content="Set" GroupName="Parameters" IsChecked="{Binding UseSetValues}"/>
+            <TextBlock Text="Kd"/>
+            <Grid x:Name="KdS">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Slider x:Name="KdSlider" 
+                        Value="{Binding Kd}"
+                        Maximum="1"
+                        Minimum="0"
+                        TickFrequency="0.01"
+                        IsSnapToTickEnabled="True"/>
+                <TextBlock Text="{Binding ElementName=KdSlider, Path=Value}"
+                           Grid.Column="1"/>
+            </Grid>
+            <TextBlock Text="Ks"/>
+            <Grid x:Name="KsS">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Slider x:Name="KsSlider" 
+                        Value="{Binding Ks}"
+                        Maximum="1"
+                        Minimum="0"
+                        TickFrequency="0.01"
+                        IsSnapToTickEnabled="True"/>
+                <TextBlock Text="{Binding ElementName=KsSlider, Path=Value}"
+                           Grid.Column="1"/>
+            </Grid>
+            <TextBlock Text="M"/>
+            <Grid x:Name="MS">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Slider x:Name="MSlider" 
+                        Value="{Binding MValue}"
+                        Maximum="100"
+                        Minimum="1"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"/>
+                <TextBlock Text="{Binding ElementName=MSlider, Path=Value}"
+                           Grid.Column="1"/>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Light color:"/>
+                <xctk:ColorPicker Grid.Column="1" SelectedColor="{Binding IL}" Width="60" Margin="5,0,0,0"/>
+            </Grid>
+            <RadioButton GroupName="Light" Content="Constant" IsChecked="{Binding UseConstantLight}"/>
+            <RadioButton GroupName="Light" Content="Animated"/>
+            <TextBlock Text="Algorithm:"/>
+            <RadioButton GroupName="Algorithm" Content="From map and texture" IsChecked="True"/>
+            <RadioButton GroupName="Algorithm" Content="Determine color" IsChecked="{Binding InterpolColor}"/>
+            <RadioButton GroupName="Algorithm" IsChecked="{Binding InterpolColorNormal}">
+                <TextBlock Text="Determine color and normal" TextWrapping="Wrap"/>
+            </RadioButton>
+        </StackPanel>
+        <Viewbox Grid.Column="1" Stretch="Uniform">
+            <Image Source="{Binding Bitmap}"
+                   Stretch="Uniform"
+                   MouseDown="Image_MouseDown"
+                   MouseMove="Image_MouseMove"
+                   MouseUp="Image_MouseUp"
+                   x:Name="Img">
+
+            </Image>
+        </Viewbox>
     </Grid>
 </Window>

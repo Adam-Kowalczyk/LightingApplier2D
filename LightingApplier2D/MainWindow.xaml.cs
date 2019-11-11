@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,96 @@ namespace LightingApplier2D
         public MainWindow()
         {
             InitializeComponent();
+            vm = new ViewModel();
+            vm.Dispatcher = Img.Dispatcher;
+            vm.Initialize();
+            //vm.UpdateBitmap();
+            DataContext = vm;
+            
+
+        }
+        ViewModel vm;
+
+        bool isDragging = false;
+        DragablePoint point = null;
+
+        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (isDragging) return;
+            var pos = e.GetPosition(sender as Image);
+
+            foreach(var p in vm.Points)
+            {
+                if(p.IsHit(pos.X, pos.Y, 8))
+                {
+                    isDragging = true;
+                    point = p;
+                    return;
+                }
+            }
+        }
+
+        private void Image_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!(e.LeftButton == MouseButtonState.Pressed || e.LeftButton == MouseButtonState.Pressed)) return;
+            if (!isDragging) return;
+            var pos = e.GetPosition(sender as Image);
+            point.X = (int)pos.X;
+            point.Y = (int)pos.Y;
+
+            //vm.UpdateBitmap();
+        }
+
+        private void Image_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!isDragging) return;
+            isDragging = false;
+            point = null;
+
+            //vm.UpdateBitmap();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog op = new OpenFileDialog();
+            op.Title = "Select a normal map";
+            op.Filter = "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg";
+            if (op.ShowDialog() == true)
+            {
+                var bitmap = System.Drawing.Image.FromFile(op.FileName);
+                var bitmapResized = new System.Drawing.Bitmap(bitmap, new System.Drawing.Size(vm.Width, vm.Height));
+                //var bmp = new BitmapImage(new Uri(op.FileName));
+                var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                  bitmapResized.GetHbitmap(),
+                  IntPtr.Zero,
+                  Int32Rect.Empty,
+                  BitmapSizeOptions.FromEmptyOptions());
+                vm.NormalMap = new WriteableBitmap(bmp);
+                vm.Initialize();
+                //vm.UpdateBitmap();
+            }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog op = new OpenFileDialog();
+            op.Title = "Select a texture";
+            op.Filter = "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg";
+            if (op.ShowDialog() == true)
+            {
+                var bitmap = System.Drawing.Image.FromFile(op.FileName);
+                var bitmapResized = new System.Drawing.Bitmap(bitmap, new System.Drawing.Size(vm.Width, vm.Height));
+                //var bmp = new BitmapImage(new Uri(op.FileName));
+                var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                  bitmapResized.GetHbitmap(),
+                  IntPtr.Zero,
+                  Int32Rect.Empty,
+                  BitmapSizeOptions.FromEmptyOptions());
+                //var bmp = new BitmapImage(new Uri(op.FileName));
+                vm.Texture = new WriteableBitmap(bmp);
+                vm.Initialize();
+                //vm.UpdateBitmap();
+            }
         }
     }
 }
