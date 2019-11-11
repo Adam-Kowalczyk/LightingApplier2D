@@ -545,7 +545,7 @@ namespace LightingApplier2D
                     if (useMap)
                     {
                         nvi = new Vector3(normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item1 - 127,
-                            normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item2 - 127,
+                            -(normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item2 - 127),
                             normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item3);
                         nvi = Vector3.Normalize(nvi);
                     }
@@ -564,7 +564,7 @@ namespace LightingApplier2D
             {
                 if (useMap)
                 {
-                    normals[i] = new Vector3(normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item1 - 127, normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item2 - 127, normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item3);
+                    normals[i] = new Vector3(normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item1 - 127, -(normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item2 - 127), normalPixels[triangle.Points[i].X, triangle.Points[i].Y].Item3);
                     normals[i] = Vector3.Normalize(normals[i]);
                 }
                 else
@@ -655,7 +655,7 @@ namespace LightingApplier2D
                             var nv = DefaultNormalVector;
                             if (useMap)
                             {
-                                nv = new Vector3(normalPixels[j, y].Item1 - 127, normalPixels[j, y].Item2 - 127, normalPixels[j, y].Item3);
+                                nv = new Vector3(normalPixels[j, y].Item1 - 127, -(normalPixels[j, y].Item2 - 127), normalPixels[j, y].Item3);
                                 nv = Vector3.Normalize(nv);
                             }
 

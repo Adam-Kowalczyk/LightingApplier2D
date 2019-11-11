@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,20 @@ namespace LightingApplier2D
             InitializeComponent();
             vm = new ViewModel();
             vm.Dispatcher = Img.Dispatcher;
+            //"C:\\Users\\Adam Kowalczyk\\Desktop\\normalCones.jpg"
+            string fileName = "normalCones.jpg";
+            string path = System.IO.Path.Combine(Environment.CurrentDirectory, fileName);
+            if(File.Exists(path))
+            {
+                var bitmap = System.Drawing.Image.FromFile(path);
+                var bitmapResized = new System.Drawing.Bitmap(bitmap, new System.Drawing.Size(vm.Width, vm.Height));
+                var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                  bitmapResized.GetHbitmap(),
+                  IntPtr.Zero,
+                  Int32Rect.Empty,
+                  BitmapSizeOptions.FromEmptyOptions());
+                vm.NormalMap = new WriteableBitmap(bmp);
+            }
             vm.Initialize();
             //vm.UpdateBitmap();
             DataContext = vm;
