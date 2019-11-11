@@ -2,5 +2,4 @@
 
 An application that simulates lighting using normal maps.
 
-![Screenshot](normalCones.jpg)
-
+<img src="normalCones.jpg" width="256" height="256" title="normalMap">
