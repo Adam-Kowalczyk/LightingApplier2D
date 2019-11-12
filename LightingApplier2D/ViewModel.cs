@@ -136,7 +136,7 @@ namespace LightingApplier2D
                 //UpdateBitmap();
             }
         }
-        public double kd = 0.5;
+        public double kd = 1;
 
         public double Ks
         {
@@ -151,7 +151,7 @@ namespace LightingApplier2D
                 //UpdateBitmap();
             }
         }
-        public double ks = 0.5;
+        public double ks = 1;
 
         public bool UseSetValues
         {
@@ -196,7 +196,7 @@ namespace LightingApplier2D
                 //UpdateBitmap();
             }
         }
-        Color iO = Colors.Crimson;
+        Color iO = Colors.White;
 
         public Vector3 L
         {
@@ -243,6 +243,69 @@ namespace LightingApplier2D
         int mValue = 4;
 
         public LightSource Light { get; set; } = new LightSource(100, 100, 10);
+
+        public int RefLightsHeight { get; set; } = 10;
+
+        public LightSource RedRefLight { get; set; } = new LightSource(0, 0, 60) {Color=Color.FromRgb(255,0,0) };
+
+        public LightSource GreenRefLight { get; set; } = new LightSource(900, 0, 60) { Color = Color.FromRgb(0, 255, 0) };
+
+        public LightSource BlueRefLight { get; set; } = new LightSource(450, 900, 60) { Color = Color.FromRgb(0, 0, 255) };
+
+        public int Focus
+        {
+            get
+            {
+                return focus;
+            }
+            set
+            {
+                if (focus == value) return;
+                focus = value;
+                OnPropertyChanged(nameof(Focus));
+                //UpdateBitmap();
+            }
+        }
+        int focus = 4;
+
+        public bool ShowReflector
+        {
+            get
+            {
+                return showReflector;
+            }
+            set
+            {
+                if (showReflector == value) return;
+                showReflector = value;
+                OnPropertyChanged(nameof(ShowReflector));
+            }
+        }
+        bool showReflector;
+
+        public int ReflHeight
+        {
+            get
+            {
+                return reflHeight;
+            }
+            set
+            {
+                if (value == reflHeight) return;
+                reflHeight = value;
+                OnPropertyChanged(nameof(ReflHeight));
+                SetReflHeight(reflHeight);
+            }
+        }
+        int reflHeight = 60;
+
+        public void SetReflHeight(int height)
+        {
+            RedRefLight.Position = new Vector3(RedRefLight.Position.X, RedRefLight.Position.Y, height);
+            GreenRefLight.Position = new Vector3(GreenRefLight.Position.X, GreenRefLight.Position.Y, height);
+            BlueRefLight.Position = new Vector3(BlueRefLight.Position.X, BlueRefLight.Position.Y, height);
+
+        }
 
         public bool UseConstantLight
         {
@@ -426,8 +489,10 @@ namespace LightingApplier2D
             bool interCol = InterpolColor;
 
             bool interNorm = InterpolColorNormal;
+
+            bool useRefl = ShowReflector;
             foreach (var tri in Triangles.ToList())
-                FillPolygon(tri, useTexture, useMap, useAnimated, useRandom, interCol, interNorm);
+                FillPolygon(tri, useTexture, useMap, useAnimated, useRandom, interCol, interNorm, useRefl);
 
 
             //Parallel.ForEach(Triangles, (x) => FillPolygon(x, useTexture, useMap));
@@ -483,7 +548,7 @@ namespace LightingApplier2D
 
         public void FillPolygon(FillingTriangle triangle, bool useTexture = false,
             bool useMap = false, bool useAnimated = true, bool useRandom = false,
-            bool interCol = false, bool interNorm = false)
+            bool interCol = false, bool interNorm = false, bool showRefl = false)
         {
             var maxY = triangle.Points.Max(x => x.Y);
             var minY = triangle.Points.Min(x => x.Y);
@@ -555,7 +620,46 @@ namespace LightingApplier2D
                         lightVector = Light.UnitToLight(triangle.Points[i].X, triangle.Points[i].Y);
                     }
 
-                    vertix[i] = CalculateColors(kdparam, ksparam, lightCol, vertix[i], lightVector, nvi, mparam);
+                    if (showRefl)
+                    {
+                        var rlV = RedRefLight.UnitToLight(triangle.Points[i].X, triangle.Points[i].Y);
+                        var rcV = RedRefLight.UnitToLight(Width / 2, Height / 2);
+                        var redCol = new Vector3((float)RedRefLight.Color.R / 255, (float)RedRefLight.Color.G / 255, (float)RedRefLight.Color.B / 255);
+                        var redFaint = Math.Pow((Vector3.Dot(-rlV, rcV)) / (Vector3.Dot(-rlV, -rlV) * Vector3.Dot(rcV, rcV)), Focus);
+                        var redCalcCol = Vector3.Multiply((float)redFaint, redCol);
+                        var redPixels = CalculateColors(kdparam, ksparam, redCalcCol, vertix[i], rlV, nvi, mparam);
+
+                        var glV = GreenRefLight.UnitToLight(triangle.Points[i].X, triangle.Points[i].Y);
+                        var gcV = GreenRefLight.UnitToLight(Width / 2, Height / 2);
+                        var greenCol = new Vector3((float)GreenRefLight.Color.R / 255, (float)GreenRefLight.Color.G / 255, (float)GreenRefLight.Color.B / 255);
+                        var greenFaint = Math.Pow((Vector3.Dot(-glV, gcV)) / (Vector3.Dot(-glV, -glV) * Vector3.Dot(gcV, gcV)), Focus);
+                        var greenCalcCol = Vector3.Multiply((float)greenFaint, greenCol);
+                        var greenPixels = CalculateColors(kdparam, ksparam, greenCalcCol, vertix[i], glV, nvi, mparam);
+
+                        var blV = BlueRefLight.UnitToLight(triangle.Points[i].X, triangle.Points[i].Y);
+                        var bcV = BlueRefLight.UnitToLight(Width / 2, Height / 2);
+                        var blueCol = new Vector3((float)BlueRefLight.Color.R / 255, (float)BlueRefLight.Color.G / 255, (float)BlueRefLight.Color.B / 255);
+                        var blueFaint = Math.Pow((Vector3.Dot(-blV, bcV)) / (Vector3.Dot(-blV, -blV) * Vector3.Dot(bcV, bcV)), Focus);
+                        var blueCalcCol = Vector3.Multiply((float)blueFaint, blueCol);
+                        var bluePixels = CalculateColors(kdparam, ksparam, blueCalcCol, vertix[i], blV, nvi, mparam);
+
+                        int sumR = greenPixels.Item1 + redPixels.Item1 + bluePixels.Item1;
+                        int sumG = greenPixels.Item2 + redPixels.Item2 + bluePixels.Item2;
+                        int sumB = greenPixels.Item3 + redPixels.Item3 + bluePixels.Item3;
+
+                        if (sumR > 255)
+                            sumR = 255;
+
+                        if (sumG > 255)
+                            sumG = 255;
+
+                        if (sumB > 255)
+                            sumB = 255;
+
+                        vertix[i] = ((byte)sumR, (byte)sumG, (byte)sumB);
+                    }
+                    else
+                        vertix[i] = CalculateColors(kdparam, ksparam, lightCol, vertix[i], lightVector, nvi, mparam);
                 }
             }
 
@@ -644,8 +748,46 @@ namespace LightingApplier2D
                             {
                                 lightVector = Light.UnitToLight(j, y);
                             }
+                            if (showRefl)
+                            {
+                                var rlV = RedRefLight.UnitToLight(j, y);
+                                var rcV = RedRefLight.UnitToLight(Width / 2, Height / 2);
+                                var redCol = new Vector3((float)RedRefLight.Color.R / 255, (float)RedRefLight.Color.G / 255, (float)RedRefLight.Color.B / 255);
+                                var redFaint = Math.Pow((Vector3.Dot(-rlV, rcV)) / (Vector3.Dot(-rlV, -rlV) * Vector3.Dot(rcV, rcV)), Focus);
+                                var redCalcCol = Vector3.Multiply((float)redFaint, redCol);
+                                var redPixels = CalculateColors(kdparam, ksparam, redCalcCol, cl, rlV, ni, mparam);
 
-                            pixels[j, y] = CalculateColors(kdparam, ksparam, lightCol, cl, lightVector, ni, mparam);
+                                var glV = GreenRefLight.UnitToLight(j, y);
+                                var gcV = GreenRefLight.UnitToLight(Width / 2, Height / 2);
+                                var greenCol = new Vector3((float)GreenRefLight.Color.R / 255, (float)GreenRefLight.Color.G / 255, (float)GreenRefLight.Color.B / 255);
+                                var greenFaint = Math.Pow((Vector3.Dot(-glV, gcV)) / (Vector3.Dot(-glV, -glV) * Vector3.Dot(gcV, gcV)), Focus);
+                                var greenCalcCol = Vector3.Multiply((float)greenFaint, greenCol);
+                                var greenPixels = CalculateColors(kdparam, ksparam, greenCalcCol, cl, glV, ni, mparam);
+
+                                var blV = BlueRefLight.UnitToLight(j, y);
+                                var bcV = BlueRefLight.UnitToLight(Width / 2, Height / 2);
+                                var blueCol = new Vector3((float)BlueRefLight.Color.R / 255, (float)BlueRefLight.Color.G / 255, (float)BlueRefLight.Color.B / 255);
+                                var blueFaint = Math.Pow((Vector3.Dot(-blV, bcV)) / (Vector3.Dot(-blV, -blV) * Vector3.Dot(bcV, bcV)), Focus);
+                                var blueCalcCol = Vector3.Multiply((float)blueFaint, blueCol);
+                                var bluePixels = CalculateColors(kdparam, ksparam, blueCalcCol, cl, blV, ni, mparam);
+
+                                int sumR = greenPixels.Item1 + redPixels.Item1 + bluePixels.Item1;
+                                int sumG = greenPixels.Item2 + redPixels.Item2 + bluePixels.Item2;
+                                int sumB = greenPixels.Item3 + redPixels.Item3 + bluePixels.Item3;
+
+                                if (sumR > 255)
+                                    sumR = 255;
+
+                                if (sumG > 255)
+                                    sumG = 255;
+
+                                if (sumB > 255)
+                                    sumB = 255;
+
+                                pixels[j, y] = ((byte)sumR, (byte)sumG, (byte)sumB);
+                            }
+                            else
+                                pixels[j, y] = CalculateColors(kdparam, ksparam, lightCol, cl, lightVector, ni, mparam);
                         }
                         else
                         {
@@ -664,7 +806,46 @@ namespace LightingApplier2D
                                 lightVector = Light.UnitToLight(j, y);
                             }
 
-                            pixels[j, y] = CalculateColors(kdparam, ksparam, lightCol, cl, lightVector, nv, mparam);
+                            if(showRefl)
+                            {
+                                var rlV = RedRefLight.UnitToLight(j, y);
+                                var rcV = RedRefLight.UnitToLight(Width / 2, Height / 2);
+                                var redCol = new Vector3((float)RedRefLight.Color.R / 255, (float)RedRefLight.Color.G / 255, (float)RedRefLight.Color.B / 255);
+                                var redFaint = Math.Pow((Vector3.Dot(-rlV, rcV)) / (Vector3.Dot(-rlV, -rlV) * Vector3.Dot(rcV, rcV)), Focus);
+                                var redCalcCol = Vector3.Multiply((float)redFaint, redCol);
+                                var redPixels = CalculateColors(kdparam, ksparam, redCalcCol, cl, rlV, nv, mparam);
+
+                                var glV = GreenRefLight.UnitToLight(j, y);
+                                var gcV = GreenRefLight.UnitToLight(Width / 2, Height / 2);
+                                var greenCol = new Vector3((float)GreenRefLight.Color.R / 255, (float)GreenRefLight.Color.G / 255, (float)GreenRefLight.Color.B / 255);
+                                var greenFaint = Math.Pow((Vector3.Dot(-glV, gcV)) / (Vector3.Dot(-glV, -glV) * Vector3.Dot(gcV, gcV)), Focus);
+                                var greenCalcCol = Vector3.Multiply((float)greenFaint, greenCol);
+                                var greenPixels = CalculateColors(kdparam, ksparam, greenCalcCol, cl, glV, nv, mparam);
+
+                                var blV = BlueRefLight.UnitToLight(j, y);
+                                var bcV = BlueRefLight.UnitToLight(Width / 2, Height / 2);
+                                var blueCol = new Vector3((float)BlueRefLight.Color.R / 255, (float)BlueRefLight.Color.G / 255, (float)BlueRefLight.Color.B / 255);
+                                var blueFaint = Math.Pow((Vector3.Dot(-blV, bcV)) / (Vector3.Dot(-blV, -blV) * Vector3.Dot(bcV, bcV)), Focus);
+                                var blueCalcCol = Vector3.Multiply((float)blueFaint, blueCol);
+                                var bluePixels = CalculateColors(kdparam, ksparam, blueCalcCol, cl, blV, nv, mparam);
+
+                                int sumR = greenPixels.Item1 + redPixels.Item1 + bluePixels.Item1;
+                                int sumG = greenPixels.Item2 + redPixels.Item2 + bluePixels.Item2;
+                                int sumB = greenPixels.Item3 + redPixels.Item3 + bluePixels.Item3;
+
+                                if (sumR > 255)
+                                    sumR = 255;
+
+                                if (sumG > 255)
+                                    sumG = 255;
+
+                                if (sumB > 255)
+                                    sumB = 255;
+
+                                pixels[j, y] = ((byte)sumR, (byte)sumG, (byte)sumB);
+                            }
+                            else
+                                pixels[j, y] = CalculateColors(kdparam, ksparam, lightCol, cl, lightVector, nv, mparam);
                         }
                     }
                 }

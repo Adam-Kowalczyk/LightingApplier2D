@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LightingApplier2D"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="LightingApplier" Height="450" Width="800">
+        Title="LightingApplier" Height="600" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150"/>
@@ -133,6 +133,37 @@
             </Grid>
             <RadioButton GroupName="Light" Content="Constant" IsChecked="{Binding UseConstantLight}"/>
             <RadioButton GroupName="Light" Content="Animated"/>
+            <RadioButton GroupName="Light" Content="Reflectors" IsChecked="{Binding ShowReflector}"/>
+            <TextBlock Text="Focus"/>
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Slider x:Name="FocusSlider" 
+                        Value="{Binding Focus}"
+                        Maximum="100"
+                        Minimum="1"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"/>
+                <TextBlock Text="{Binding ElementName=FocusSlider, Path=Value}"
+                           Grid.Column="1"/>
+            </Grid>
+            <TextBlock Text="Height"/>
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Slider x:Name="ReflSlider" 
+                        Value="{Binding ReflHeight}"
+                        Maximum="400"
+                        Minimum="1"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"/>
+                <TextBlock Text="{Binding ElementName=ReflSlider, Path=Value}"
+                           Grid.Column="1"/>
+            </Grid>
             <TextBlock Text="Algorithm:"/>
             <RadioButton GroupName="Algorithm" Content="From map and texture" IsChecked="True"/>
             <RadioButton GroupName="Algorithm" Content="Determine color" IsChecked="{Binding InterpolColor}"/>

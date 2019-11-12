@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace LightingApplier2D
 {
@@ -20,5 +21,7 @@ namespace LightingApplier2D
             var cal = Vector3.Subtract(Position, new Vector3(x, y, 0));
             return Vector3.Normalize(cal);
         }
+
+        public Color Color { get; set; }
     }
 }
