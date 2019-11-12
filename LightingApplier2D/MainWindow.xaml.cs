@@ -28,7 +28,7 @@ namespace LightingApplier2D
             vm = new ViewModel();
             vm.Dispatcher = Img.Dispatcher;
             //"C:\\Users\\Adam Kowalczyk\\Desktop\\normalCones.jpg"
-            string fileName = "normalCones.jpg";
+            string fileName = @"..\..\normalCones.jpg";
             string path = System.IO.Path.Combine(Environment.CurrentDirectory, fileName);
             if(File.Exists(path))
             {
