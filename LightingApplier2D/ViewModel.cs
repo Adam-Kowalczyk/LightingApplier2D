@@ -511,7 +511,7 @@ namespace LightingApplier2D
             var aetTable = new List<EdgeStruct>();
             int y = minY;
             (byte, byte, byte) col = (IO.R, IO.G, IO.B);
-            var lightCol = new Vector3(IL.R / 255, IL.G / 255, IL.B / 255);
+            var lightCol = new Vector3((float)IL.R / 255, (float)IL.G / 255, (float)IL.B / 255);
             var lightVector = DefaultNormalVector;
             var kdparam = Kd;
             var ksparam = Ks;
